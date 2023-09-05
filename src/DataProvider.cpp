@@ -74,6 +74,7 @@ void DataProvider::handleDownload() {
 
     // Download Completed
     if (_downloadState == COMPLETED) {
+        Serial.printf("@2309041451 handleDownload COMPLETED\n", _downloadState);
         _downloadSequenceIdx = 0;
         _numberOfSamplesToDownload = 0;
         _numberOfSamplePacketsToDownload = 0;
@@ -83,6 +84,7 @@ void DataProvider::handleDownload() {
 
     // Start Download
     if (_downloadState == START) {
+        Serial.printf("@2309041451 handleDownload START\n", _downloadState);
         _numberOfSamplesToDownload = _sampleHistory.numberOfSamplesInHistory();
 
         _numberOfSamplePacketsToDownload =

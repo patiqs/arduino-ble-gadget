@@ -60,7 +60,6 @@ class DataProvider: public IProviderCallbacks {
     String getDeviceIdString() const;
     bool isDownloading() const;
 
-  private:
     std::string _buildAdvertisementData();
     DownloadHeader _buildDownloadHeader();
     DownloadPacket _buildDownloadPacket();
