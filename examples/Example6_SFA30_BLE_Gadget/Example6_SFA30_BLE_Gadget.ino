@@ -4,13 +4,16 @@
 #include "Sensirion_Gadget_BLE.h"
 #include <SensirionI2CSfa3x.h>
 
+#define I2C_SDA 33
+#define I2C_SCL 32
+
 SensirionI2CSfa3x sfa3x;
 
 // GadgetBle workflow
 static int64_t lastMeasurementTimeMs = 0;
-static int measurementIntervalMs = 1000;
+static int measurementIntervalMs = 5000;
 NimBLELibraryWrapper lib;
-DataProvider provider(lib, DataType::T_RH_HCHO);
+DataProvider provider(lib, DataType::T_RH_CO2_VOC_PM25_HCHO_V2);
 
 void setup() {
   Serial.begin(115200);
@@ -33,7 +36,7 @@ void setup() {
   uint16_t error;
   char errorMessage[256];
 
-  Wire.begin();
+  Wire.begin(I2C_SDA, I2C_SCL, 10000UL);
   
   // init I2C
   sfa3x.begin(Wire);
@@ -66,7 +69,8 @@ void measure_and_report() {
   int16_t hcho_raw;
   int16_t humidity_raw;
   int16_t temperature_raw;
-  
+  float h= (provider._historyIntervalMilliSeconds / 1000) % 1000;
+  h /= 10.0f;
 
   delay(10);
   uint16_t error;
@@ -78,7 +82,8 @@ void measure_and_report() {
       Serial.print("Error trying to execute readMeasuredValues(): ");
       errorToString(error, errorMessage, 256);
       Serial.println(errorMessage);
-      return;
+
+   //   return;
   }
 
   // Applying scale factors before printing measured values
@@ -93,7 +98,7 @@ void measure_and_report() {
   Serial.println();
 
   provider.writeValueToCurrentSample(hcho_raw/5.0, SignalType::HCHO_PARTS_PER_BILLION);
-  provider.writeValueToCurrentSample(humidity_raw/100.0, SignalType::RELATIVE_HUMIDITY_PERCENTAGE);
+  provider.writeValueToCurrentSample(h, SignalType::RELATIVE_HUMIDITY_PERCENTAGE);
   provider.writeValueToCurrentSample(temperature_raw/200.0, SignalType::TEMPERATURE_DEGREES_CELSIUS);
 
   provider.commitSample();
